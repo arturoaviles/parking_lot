@@ -1,0 +1,13 @@
+{
+  "TOTAL_SPOTS": 20,
+  "FREE_MINUTES": 15,
+  "TIME_FRAME_HOURS": {
+    "hourly": 1,
+    "daily": 24
+  },
+  "TIME_FRAME_TARIFFS": {
+    "hourly": "1.00",
+    "daily": "16.00"
+  },
+  "DATE_TIME_FORMAT": "%Y-%m-%d %H:%M:%S"
+}
