@@ -99,7 +99,6 @@ def test_parking_lot_constructor():
   """Test Parking Lot constructor."""
   parking_lot = ParkingLot(10)
   assert parking_lot.total_spots == 10
-  assert parking_lot.available_spots == set(range(1, 11))
   assert parking_lot.occupied_spots == {}
 
 def test_parking_lot_add_car():
@@ -110,7 +109,6 @@ def test_parking_lot_add_car():
   assert ticket.car == "ABC-123"
   assert ticket.tariff == "hourly"
   assert ticket.location == 1
-  assert parking_lot.available_spots == set(range(2, 11))
   assert parking_lot.occupied_spots == {1: ticket}
 
 def test_full_parking_lot():
@@ -127,7 +125,6 @@ def test_parking_lot_remove_car():
   car = Car("ABC-123")
   ticket = parking_lot.add_car(car, "hourly")
   assert parking_lot.remove_car(1) == ticket
-  assert parking_lot.available_spots == set(range(1, 11))
   assert parking_lot.occupied_spots == {}
 
 def test_parking_lot_remove_wrong_car():

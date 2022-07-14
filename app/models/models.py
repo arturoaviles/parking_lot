@@ -96,7 +96,6 @@ class ParkingLot:
 			None
 		"""
 		self.total_spots: int = total_spots
-		self.available_spots: Set[int] = set(range(1, self.total_spots+1))
 		self.occupied_spots: Dict[int, Ticket] = {}
 
 	def add_car(self, car: Car, tariff: str) -> Ticket:
@@ -108,16 +107,11 @@ class ParkingLot:
 		Raises:
 			ParkingLotFullError: If the Parking Lot is full.
 		"""
-
-		try:
-			available_spot = self.available_spots.pop()
-		except KeyError as e: # Full parking Lot
-			raise ParkingLotFullError("No free space") from e
-
-		self.occupied_spots[available_spot] = Ticket(car.license_plate, tariff, available_spot)
-
-		return self.occupied_spots[available_spot]
-
+		available_spot = len(self.occupied_spots) + 1
+		if available_spot <= self.total_spots:
+			self.occupied_spots[available_spot] = Ticket(car.license_plate, tariff, available_spot)
+			return self.occupied_spots[available_spot]
+		raise ParkingLotFullError("No free space")
 
 	def remove_car(self, parking_spot: int) -> Ticket:
 		"""Remove car from Parking Lot.
@@ -134,8 +128,6 @@ class ParkingLot:
 			raise ParkingLotLocationEmptyError("Vehicle not found in location.") from e
 
 		ticket.calculate_fee()
-
-		self.available_spots.add(parking_spot)
 
 		return ticket
 
