@@ -131,7 +131,7 @@ class ParkingLot:
 		try:
 			ticket = self.occupied_spots.pop(parking_spot)
 		except KeyError as e:
-			raise ParkingLotLocationEmptyError("The location is empty") from e
+			raise ParkingLotLocationEmptyError("Vehicle not found in location.") from e
 
 		ticket.calculate_fee()
 

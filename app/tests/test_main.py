@@ -48,10 +48,10 @@ def test_parking_lot_remove_wrong_car():
   """Test removing a car that is not in the parking lot
   """
   response = client.get("/remove", params={"location": 2})
-  assert response.status_code == 200
+  assert response.status_code == 404
 
   response_dict = response.json()
-  assert response_dict == {"status": "error", "description": "The location is empty"}
+  assert response_dict == {"status": "error", "description": "Vehicle not found in location."}
 
 def test_full_parking_lot_add_car():
   """Test adding a car to a full parking lot
@@ -61,7 +61,7 @@ def test_full_parking_lot_add_car():
     assert response.status_code == 200
 
   response = client.get("/add", params={"car": "ABC-123", "tariff": "hourly"})
-  assert response.status_code == 200
+  assert response.status_code == 507
 
   response_dict = response.json()
   assert response_dict == {"status": "error", "description": "No free space"}

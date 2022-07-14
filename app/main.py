@@ -44,7 +44,7 @@ def add_car(car: str, tariff: str):
 				"status": "error",
 				"description": str(e)
 			},
-			status_code=200
+			status_code=507
 		)
 
 	return JSONResponse(
@@ -76,7 +76,7 @@ def remove_car(location: int) -> JSONResponse:
 				"status": "error",
 				"description": str(e)
 			},
-			status_code=200
+			status_code=404
 		)
 
 	return JSONResponse(
