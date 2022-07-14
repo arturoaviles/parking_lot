@@ -18,6 +18,14 @@ class ParkingLotLocationEmptyError(Exception):
 	"""Custom error that is raised when the Parking Lot location is empty"""
 	pass
 
+class PaginationLimitError(Exception):
+	"""Custom error that is raised when the Pagination limit is not between 1 and 100"""
+	pass
+
+class PaginationStartError(Exception):
+	"""Custom error that is raised when the Pagination start is not between 1 and Parking Lot total spots"""
+	pass
+
 class Ticket:
 	def __init__(self, license_plate: str, tariff: str, location: int) -> None:
 		"""Ticket constructor
@@ -132,12 +140,37 @@ class ParkingLot:
 		return ticket
 
 
-	def list_cars(self) -> List[Dict[str, Any]]:
+	def list_cars(self, start: int = 1, limit: int = 10) -> List[Dict[str, Any]]:
 		"""List cars in the Parking Lot.
+
+		Args:
+			start (int): Start index of cars to list.
+			limit (int): Limit of cars to list.
 
 		Returns:
 			List[Dict[str, Any]]: List of cars in the Parking Lot.
 		"""
-		return [vars(ticket) for ticket in self.occupied_spots.values()]
+		if start <= 0 or start > self.total_spots:
+			raise PaginationStartError("Start must be between 1 and %d" % self.total_spots)
+
+		if limit <= 0 or limit > 100:
+			raise PaginationLimitError("Limit must be between 1 and 100")
+
+		cars = []
+
+		if len(self.occupied_spots) == 0:
+			return cars
+
+		for spot in range(start, start + limit):
+			if ticket := self.occupied_spots.get(spot):
+				cars.append({
+					"license_plate": ticket.car,
+					"tariff": ticket.tariff,
+					"location": ticket.location,
+					"start": ticket.start,
+					"finish": ticket.finish,
+					"fee": ticket.fee
+				})
+		return cars
 
 

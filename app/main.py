@@ -1,7 +1,14 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
-from models.models import ParkingLot, Car, ParkingLotFullError, ParkingLotLocationEmptyError
+from models.models import (
+	ParkingLot,
+	Car,
+	ParkingLotFullError,
+	ParkingLotLocationEmptyError,
+	PaginationLimitError,
+	PaginationStartError
+)
 
 from config import (
 	TOTAL_SPOTS,
@@ -94,16 +101,36 @@ def remove_car(location: int) -> JSONResponse:
 
 
 @app.get("/list")
-def list_parked_cars() -> JSONResponse:
+def list_parked_cars(start: int = 1, limit: int = 10) -> JSONResponse:
 	"""List parked cars endpoint handler
 
 	Returns:
 			JSONResponse: JSON with the list of cars in the parking lot.
 	"""
+
+	try:
+		cars = parking_lot.list_cars(start=start, limit=limit)
+	except PaginationLimitError as e:
+		return JSONResponse(
+			content={
+				"status": "error",
+				"description": str(e)
+			},
+			status_code=400
+		)
+	except PaginationStartError as e:
+		return JSONResponse(
+			content={
+				"status": "error",
+				"description": str(e)
+			},
+			status_code=400
+		)
+
 	return JSONResponse(
 		content={
 			"status": "success",
-			"cars": parking_lot.list_cars()
+			"cars": cars
 		},
 		status_code=200
 	)
