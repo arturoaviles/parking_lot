@@ -54,7 +54,9 @@ def test_parking_lot_add_car():
   response_dict = response.json()
   response_dict.pop("start", None)
   response_dict.pop("finish", None)
-  assert response_dict == {"status": "success", "car": "B1", "tariff": "hourly", "location": 1}
+  
+  base_tariff_cost = TIME_FRAME_TARIFFS.get("hourly")
+  assert response_dict == {"status": "success", "car": "B1", "tariff": "hourly", "location": 1, "base_cost": base_tariff_cost}
   client.get("/remove", params={"location": 1})
 
 
@@ -69,7 +71,9 @@ def test_parking_lot_remove_car():
   response_dict = response.json()
   response_dict.pop("start", None)
   response_dict.pop("finish", None)
-  assert response_dict == {"status": "success", "car": "A2", "tariff": "hourly", "location": 1, "fee": "0.00"}
+
+  base_tariff_cost = TIME_FRAME_TARIFFS.get("hourly")
+  assert response_dict == {"status": "success", "car": "A2", "tariff": "hourly", "location": 1, "base_cost": base_tariff_cost, "fee": "0.00"}
 
 def test_parking_lot_remove_wrong_car():
   """Test removing a car that is not in the parking lot

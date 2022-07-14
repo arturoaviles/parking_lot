@@ -7,7 +7,8 @@ from models.models import (
 	ParkingLotFullError,
 	ParkingLotLocationEmptyError,
 	PaginationLimitError,
-	PaginationStartError
+	PaginationStartError,
+	Configuration
 )
 
 from config import (
@@ -17,7 +18,7 @@ from config import (
 
 app = FastAPI()
 
-parking_lot = ParkingLot(TOTAL_SPOTS)
+parking_lot = ParkingLot(TOTAL_SPOTS, TIME_FRAME_TARIFFS)
 
 @app.get("/")
 def index() -> JSONResponse:
@@ -60,7 +61,8 @@ def add_car(car: str, tariff: str):
 			"car": ticket.car,
 			"tariff": ticket.tariff,
 			"location": ticket.location,
-			"start": ticket.start
+			"start": ticket.start,
+			"base_cost": ticket.base_tariff_cost
 		},
 		status_code=200
 	)
@@ -93,8 +95,9 @@ def remove_car(location: int) -> JSONResponse:
 			"finish": ticket.finish,
 			"location": ticket.location,
 			"car": ticket.car,
-			"fee": ticket.fee,
-			"tariff": ticket.tariff
+			"tariff": ticket.tariff,
+			"base_cost": ticket.base_tariff_cost,
+			"fee": ticket.fee
 		},
 		status_code=200
 	)
@@ -134,3 +137,31 @@ def list_parked_cars(start: int = 1, limit: int = 10) -> JSONResponse:
 		},
 		status_code=200
 	)
+
+@app.get("/config")
+def get_current_config():
+	return JSONResponse(
+		content={
+			"status": "success",
+			"total_spots": parking_lot.total_spots,
+			"time_frame_tariffs": parking_lot.time_frame_tariffs
+		},
+		status_code=200
+	)
+
+@app.post("/config")
+def config(config: Configuration):
+	"""Config endpoint handler
+
+	Returns:
+			JSONResponse: JSON with the config file.
+	"""
+	updated_configuration = parking_lot.update_configuration(config)
+	return JSONResponse(
+		content={
+			"status": "success",
+			"config": updated_configuration
+		},
+		status_code=200
+	)
+

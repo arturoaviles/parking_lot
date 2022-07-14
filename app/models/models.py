@@ -3,6 +3,8 @@ from decimal import Decimal
 from math import floor
 from typing import Any, Dict, List, Set
 
+from pydantic import BaseModel
+
 from config import (
 	DATE_TIME_FORMAT,
 	FREE_MINUTES,
@@ -27,7 +29,7 @@ class PaginationStartError(Exception):
 	pass
 
 class Ticket:
-	def __init__(self, license_plate: str, tariff: str, location: int) -> None:
+	def __init__(self, license_plate: str, tariff: str, location: int, base_tariff_cost: str) -> None:
 		"""Ticket constructor
 
 		Args:
@@ -40,6 +42,7 @@ class Ticket:
 		"""
 		self.car: str = license_plate
 		self.tariff: str = tariff
+		self.base_tariff_cost: str = base_tariff_cost
 		self.location: int = location
 		self.start: str = datetime.now().strftime(DATE_TIME_FORMAT)
 		self.finish: str = ""
@@ -64,6 +67,7 @@ class Ticket:
 		Returns:
 			None
 		"""
+
 		self.finish = end_datetime.strftime(DATE_TIME_FORMAT)
 		delta = self._get_total_time()
 		total_minutes = delta / timedelta(minutes=1)
@@ -73,14 +77,13 @@ class Ticket:
 			return
 
 		time_frame = TIME_FRAME_HOURS.get(self.tariff)
-		tariff = TIME_FRAME_TARIFFS.get(self.tariff)
 
 		total_time = delta / timedelta(hours=time_frame)
 
 		if not total_time.is_integer():
 			total_time += 1
 
-		self.fee = str(Decimal(tariff) * Decimal(floor(total_time)))
+		self.fee = str(Decimal(self.base_tariff_cost) * Decimal(floor(total_time)))
 
 
 class Car:
@@ -97,7 +100,7 @@ class Car:
 
 
 class ParkingLot:
-	def __init__(self, total_spots: int) -> None:
+	def __init__(self, total_spots: int, time_frame_tariffs: Dict[str, str]) -> None:
 		"""Parking Lot constructor.
 
 		Returns:
@@ -105,6 +108,18 @@ class ParkingLot:
 		"""
 		self.total_spots: int = total_spots
 		self.occupied_spots: Dict[int, Ticket] = {}
+		self.time_frame_tariffs = time_frame_tariffs
+
+	def update_configuration(self, configuration: dict):
+		"""Update the Parking Lot configuration.
+
+		Returns:
+			None
+		"""
+		self.total_spots = configuration.total_spots
+		self.time_frame_tariffs = configuration.time_frame_tariffs
+
+		return {"total_spots": self.total_spots, "time_frame_tariffs": self.time_frame_tariffs}
 
 	def add_car(self, car: Car, tariff: str) -> Ticket:
 		"""Add car to the Parking Lot.
@@ -117,7 +132,8 @@ class ParkingLot:
 		"""
 		available_spot = len(self.occupied_spots) + 1
 		if available_spot <= self.total_spots:
-			self.occupied_spots[available_spot] = Ticket(car.license_plate, tariff, available_spot)
+			base_tariff_cost = self.time_frame_tariffs.get(tariff)
+			self.occupied_spots[available_spot] = Ticket(car.license_plate, tariff, available_spot, base_tariff_cost)
 			return self.occupied_spots[available_spot]
 		raise ParkingLotFullError("No free space")
 
@@ -166,6 +182,7 @@ class ParkingLot:
 				cars.append({
 					"license_plate": ticket.car,
 					"tariff": ticket.tariff,
+					"base_cost": ticket.base_tariff_cost,
 					"location": ticket.location,
 					"start": ticket.start,
 					"finish": ticket.finish,
@@ -174,3 +191,18 @@ class ParkingLot:
 		return cars
 
 
+class Configuration(BaseModel):
+	"""Parking Lot configuration model"""
+	total_spots: int
+	time_frame_tariffs: Dict[str, str]
+
+	class Config:
+		schema_extra = {
+			"example": {
+				"total_spots": 10,
+				"time_frame_tariffs": {
+					"hourly": "2.00",
+					"daily": "18.00",
+				}
+			}
+		}
