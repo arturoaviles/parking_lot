@@ -1,11 +1,9 @@
-from email.mime import base
 import pytest
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 
 from config import (
-  DATE_TIME_FORMAT,
   FREE_MINUTES,
   TIME_FRAME_TARIFFS,
   TOTAL_SPOTS
@@ -49,7 +47,7 @@ def test_ticket_calculate_fee_hourly_exact_free_minutes():
   time_frame = "hourly"
   base_tariff_cost = TIME_FRAME_TARIFFS.get(time_frame)
   ticket = Ticket("D", time_frame, 1, base_tariff_cost)
-  delta =  datetime.strptime(ticket.start, DATE_TIME_FORMAT) + timedelta(minutes=FREE_MINUTES)
+  delta =  ticket.start + timedelta(minutes=FREE_MINUTES)
   ticket.calculate_fee(delta)
   assert ticket.fee == "0.00"
 
@@ -58,7 +56,7 @@ def test_ticket_calculate_fee_hourly_free_minutes_plus_1_second():
   time_frame = "hourly"
   base_tariff_cost = TIME_FRAME_TARIFFS.get(time_frame)
   ticket = Ticket("E", time_frame, 1, base_tariff_cost)
-  delta =  datetime.strptime(ticket.start, DATE_TIME_FORMAT) + timedelta(minutes=FREE_MINUTES) + timedelta(seconds=1)
+  delta =  ticket.start + timedelta(minutes=FREE_MINUTES) + timedelta(seconds=1)
   ticket.calculate_fee(delta)
   assert ticket.fee == TIME_FRAME_TARIFFS.get(time_frame) * 1
 
@@ -67,7 +65,7 @@ def test_ticket_calculate_fee_hourly_free_minutes_plus_1_minute():
   time_frame = "hourly"
   base_tariff_cost = TIME_FRAME_TARIFFS.get(time_frame)
   ticket = Ticket("F", time_frame, 1, base_tariff_cost)
-  delta =  datetime.strptime(ticket.start, DATE_TIME_FORMAT) + timedelta(minutes=FREE_MINUTES) + timedelta(minutes=1)
+  delta =  ticket.start + timedelta(minutes=FREE_MINUTES) + timedelta(minutes=1)
   ticket.calculate_fee(delta)
   assert ticket.fee == TIME_FRAME_TARIFFS.get(time_frame) * 1
 
@@ -76,7 +74,7 @@ def test_ticket_calculate_fee_hourly_1_hour():
   time_frame = "hourly"
   base_tariff_cost = TIME_FRAME_TARIFFS.get(time_frame)
   ticket = Ticket("G", time_frame, 1, base_tariff_cost)
-  delta =  datetime.strptime(ticket.start, DATE_TIME_FORMAT) + timedelta(minutes=60)
+  delta =  ticket.start + timedelta(minutes=60)
   ticket.calculate_fee(delta)
   assert ticket.fee == TIME_FRAME_TARIFFS.get(time_frame) * 1
 
@@ -85,7 +83,7 @@ def test_ticket_calculate_fee_hourly_1_hour_plus_1_minute():
   time_frame = "hourly"
   base_tariff_cost = TIME_FRAME_TARIFFS.get(time_frame)
   ticket = Ticket("H", time_frame, 1, base_tariff_cost)
-  delta =  datetime.strptime(ticket.start, DATE_TIME_FORMAT) + timedelta(minutes=60) + timedelta(minutes=1)
+  delta =  ticket.start + timedelta(minutes=60) + timedelta(minutes=1)
   ticket.calculate_fee(delta)
   assert ticket.fee == str(Decimal(TIME_FRAME_TARIFFS.get(time_frame)) * Decimal("2"))
 
@@ -94,7 +92,7 @@ def test_ticket_calculate_fee_hourly_2_hours_plus_1_minute():
   time_frame = "hourly"
   base_tariff_cost = TIME_FRAME_TARIFFS.get(time_frame)
   ticket = Ticket("I", "hourly", 1, base_tariff_cost)
-  delta =  datetime.strptime(ticket.start, DATE_TIME_FORMAT) + timedelta(minutes=120) + timedelta(minutes=1)
+  delta =  ticket.start + timedelta(minutes=120) + timedelta(minutes=1)
   ticket.calculate_fee(delta)
   assert ticket.fee == str(Decimal(TIME_FRAME_TARIFFS.get(time_frame)) * Decimal("3"))
 
@@ -103,7 +101,7 @@ def test_ticket_calculate_fee_daily():
   time_frame = "daily"
   base_tariff_cost = TIME_FRAME_TARIFFS.get(time_frame)
   ticket = Ticket("J", time_frame, 1, base_tariff_cost)
-  delta =  datetime.strptime(ticket.start, DATE_TIME_FORMAT) + timedelta(minutes=16)
+  delta =  ticket.start + timedelta(minutes=16)
   ticket.calculate_fee(delta)
   assert ticket.fee == str(Decimal(TIME_FRAME_TARIFFS.get(time_frame)) * Decimal("1"))
 
@@ -112,7 +110,7 @@ def test_ticket_calculate_fee_daily_24_hours():
   time_frame = "daily"
   base_tariff_cost = TIME_FRAME_TARIFFS.get(time_frame)
   ticket = Ticket("K", time_frame, 1, base_tariff_cost)
-  delta =  datetime.strptime(ticket.start, DATE_TIME_FORMAT) + timedelta(hours=24)
+  delta =  ticket.start + timedelta(hours=24)
   ticket.calculate_fee(delta)
   assert ticket.fee == str(Decimal(TIME_FRAME_TARIFFS.get(time_frame)) * Decimal("1"))
 
@@ -121,7 +119,7 @@ def test_ticket_calculate_fee_daily_24_hours_plus_1_minute():
   time_frame = "daily"
   base_tariff_cost = TIME_FRAME_TARIFFS.get(time_frame)
   ticket = Ticket("L", time_frame, 1, base_tariff_cost)
-  delta =  datetime.strptime(ticket.start, DATE_TIME_FORMAT) + timedelta(hours=24) + timedelta(minutes=1)
+  delta =  ticket.start + timedelta(hours=24) + timedelta(minutes=1)
   ticket.calculate_fee(delta)
   assert ticket.fee == str(Decimal(TIME_FRAME_TARIFFS.get(time_frame)) * Decimal("2"))
 

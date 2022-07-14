@@ -44,8 +44,8 @@ class Ticket:
 		self.tariff: str = tariff
 		self.base_tariff_cost: str = base_tariff_cost
 		self.location: int = location
-		self.start: str = datetime.now().strftime(DATE_TIME_FORMAT)
-		self.finish: str = ""
+		self.start: datetime = datetime.now()
+		self.finish: datetime = None
 		self.fee: str = ""
 
 	def _get_total_time(self) -> timedelta:
@@ -54,21 +54,18 @@ class Ticket:
 		Returns:
 			timedelta: Total time for the ticket.
 		"""
-		try:
-			start = datetime.strptime(self.start, DATE_TIME_FORMAT)
-			finish = datetime.strptime(self.finish, DATE_TIME_FORMAT)
-		except ValueError as e:
-			raise ValueError("Invalid date format") from e
-		return finish - start
+		return self.finish - self.start
 
-	def calculate_fee(self, end_datetime: datetime = datetime.now()) -> None:
+	def calculate_fee(self, end_datetime: datetime = None) -> None:
 		"""Calculate the fee for the ticket
 
 		Returns:
 			None
 		"""
+		if end_datetime is None:
+			end_datetime = datetime.now()
 
-		self.finish = end_datetime.strftime(DATE_TIME_FORMAT)
+		self.finish = end_datetime
 		delta = self._get_total_time()
 		total_minutes = delta / timedelta(minutes=1)
 
@@ -84,6 +81,16 @@ class Ticket:
 			total_time += 1
 
 		self.fee = str(Decimal(self.base_tariff_cost) * Decimal(floor(total_time)))
+
+	def stringify_datetime(self, ticket_datetime) -> str:
+		"""Get the finish datetime as a string if it is not None
+
+		Returns:
+			str: Finish datetime as a string if it is not None.
+		"""
+		if ticket_datetime is None:
+			return ""
+		return datetime.strftime(ticket_datetime, DATE_TIME_FORMAT)
 
 
 class Car:
@@ -184,8 +191,8 @@ class ParkingLot:
 					"tariff": ticket.tariff,
 					"base_cost": ticket.base_tariff_cost,
 					"location": ticket.location,
-					"start": ticket.start,
-					"finish": ticket.finish,
+					"start": ticket.stringify_datetime(ticket.start),
+					"finish": ticket.stringify_datetime(ticket.finish),
 					"fee": ticket.fee
 				})
 		return cars

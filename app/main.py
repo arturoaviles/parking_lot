@@ -61,7 +61,7 @@ def add_car(car: str, tariff: str):
 			"car": ticket.car,
 			"tariff": ticket.tariff,
 			"location": ticket.location,
-			"start": ticket.start,
+			"start": ticket.stringify_datetime(ticket.start),
 			"base_cost": ticket.base_tariff_cost
 		},
 		status_code=200
@@ -91,8 +91,8 @@ def remove_car(location: int) -> JSONResponse:
 	return JSONResponse(
 		content={
 			"status": "success",
-			"start": ticket.start,
-			"finish": ticket.finish,
+			"start": ticket.stringify_datetime(ticket.start),
+			"finish": ticket.stringify_datetime(ticket.finish),
 			"location": ticket.location,
 			"car": ticket.car,
 			"tariff": ticket.tariff,
