@@ -1,0 +1,17 @@
+version: '3.4'
+
+services:
+  parking_lot:
+    image: parking_lot
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./app:/app
+    #env_file:
+    #  - ./app/.env
+    #command: sh -c "gunicorn --reload --bind 0.0.0.0:9000 --log-level debug -k uvicorn.workers.UvicornWorker main:app"
+    command: >
+      sh -c "uvicorn main:app --host 0.0.0.0 --port 9000 --reload --log-level debug"
+    ports:
+      - 9000:9000
